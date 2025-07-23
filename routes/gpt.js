@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { generateResponse, checkServiceHealth } = require('../services/gptService');
-const { getEstimatedTokenCount } = require('../config/systemPrompt');
+const { generateResponse } = require('../services/gptService');
 
 /**
  * Validates chat request parameters
@@ -54,6 +53,15 @@ function validateChatRequest(body) {
  *   "maxTokens": 150,       // optional, 1-300
  *   "topP": 0.9            // optional, 0.0-1.0
  * }
+ * 
+ * Response:
+ * {
+ *   "success": true,
+ *   "data": {
+ *     "response": "Generated response about Kristian...",
+ *     "metadata": { ... }
+ *   }
+ * }
  */
 router.post('/chat', async (req, res) => {
   try {
@@ -70,7 +78,7 @@ router.post('/chat', async (req, res) => {
     const { query, temperature, maxTokens, topP } = req.body;
     
     // Log the request (helpful for monitoring)
-    console.log(`FischGPT chat request: "${query.substring(0, 100)}${query.length > 100 ? '...' : ''}"`);
+    console.log(`💬 FischGPT chat request: "${query.substring(0, 100)}${query.length > 100 ? '...' : ''}"`);
     
     // Generate response using GPT service
     const result = await generateResponse(query, {
@@ -89,7 +97,7 @@ router.post('/chat', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('FischGPT chat endpoint error:', error.message);
+    console.error('💥 FischGPT chat endpoint error:', error.message);
     
     // Return appropriate error response
     res.status(500).json({
@@ -98,59 +106,6 @@ router.post('/chat', async (req, res) => {
       message: error.message
     });
   }
-});
-
-/**
- * GET /api/health
- * Health check endpoint with GPT service status
- */
-router.get('/health', async (req, res) => {
-  try {
-    const gptServiceHealthy = await checkServiceHealth();
-    const systemPromptTokens = getEstimatedTokenCount();
-    
-    res.json({
-      success: true,
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      service: 'FischGPT Backend',
-      gptService: {
-        status: gptServiceHealthy ? 'healthy' : 'unhealthy',
-        systemPromptTokens: systemPromptTokens
-      }
-    });
-  } catch (error) {
-    console.error('Health check error:', error.message);
-    res.status(500).json({
-      success: false,
-      status: 'unhealthy',
-      timestamp: new Date().toISOString(),
-      service: 'FischGPT Backend',
-      error: error.message
-    });
-  }
-});
-
-/**
- * GET /api/info
- * Get information about the FischGPT system
- */
-router.get('/info', (req, res) => {
-  res.json({
-    success: true,
-    service: 'FischGPT Backend',
-    description: 'AI assistant for questions about Kristian Fischer',
-    version: '1.0.0',
-    endpoints: {
-      chat: 'POST /api/chat - Generate responses about Kristian Fischer',
-      health: 'GET /api/health - Service health check',
-      info: 'GET /api/info - Service information'
-    },
-    systemPrompt: {
-      estimatedTokens: getEstimatedTokenCount(),
-      description: 'Optimized prompt about Kristian Fischer\'s background and expertise'
-    }
-  });
 });
 
 module.exports = router; 

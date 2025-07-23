@@ -7,6 +7,8 @@ var cors = require('cors');
 
 var indexRouter = require('./routes/index');
 var gptRouter = require('./routes/gpt');
+var wakeUpRouter = require('./routes/wakeUp');
+var systemRouter = require('./routes/system');
 
 var app = express();
 
@@ -27,6 +29,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // API routes (primary functionality)
 app.use('/api', gptRouter);
+app.use('/api/wake', wakeUpRouter);
+app.use('/api', systemRouter);
 
 // Legacy routes (keeping for compatibility)
 app.use('/', indexRouter);
