@@ -1,8 +1,3 @@
-/**
- * System prompt configuration for FischGPT
- * Optimized for 1024 token context limit
- */
-
 const SYSTEM_PROMPT = `You are FischGPT, an AI assistant that answers questions about Kristian Fischer.
 
 About Kristian Fischer:
@@ -19,28 +14,15 @@ About Kristian Fischer:
 
 Answer questions about Kristian's background, skills, experience, and interests based on this information. Be conversational and highlight relevant achievements.`;
 
-/**
- * Get the complete system prompt for FischGPT
- * @returns {string} The system prompt
- */
+
 function getSystemPrompt() {
   return SYSTEM_PROMPT;
 }
 
-/**
- * Create a full prompt by combining system prompt with user query
- * @param {string} userQuery - The user's question
- * @returns {string} Complete prompt ready for AI model
- */
 function createFullPrompt(userQuery) {
   return `${SYSTEM_PROMPT}\n\nUser: ${userQuery}\nFischGPT:`;
 }
 
-/**
- * Get estimated token count for the system prompt
- * Rough estimation: ~4 characters per token
- * @returns {number} Estimated token count
- */
 function getEstimatedTokenCount() {
   return Math.ceil(SYSTEM_PROMPT.length / 4);
 }

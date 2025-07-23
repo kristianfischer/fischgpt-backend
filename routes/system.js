@@ -3,16 +3,7 @@ const router = express.Router();
 const { checkServiceHealth } = require('../services/gptService');
 const { getEstimatedTokenCount } = require('../config/systemPrompt');
 
-/**
- * GET /api/health
- * Health check endpoint with GPT service status
- * 
- * Returns:
- * - Overall backend health status
- * - GPT service connectivity
- * - System prompt token count
- * - Timestamp
- */
+
 router.get('/health', async (req, res) => {
   try {
     console.log('🔍 Health check requested');
@@ -47,16 +38,6 @@ router.get('/health', async (req, res) => {
   }
 });
 
-/**
- * GET /api/info
- * Get comprehensive information about the FischGPT system
- * 
- * Returns:
- * - Service description and version
- * - Available endpoints
- * - System prompt information
- * - Related services information
- */
 router.get('/info', (req, res) => {
   res.json({
     success: true,
@@ -66,18 +47,12 @@ router.get('/info', (req, res) => {
     author: 'Kristian Fischer',
     repository: 'https://github.com/kristianfischer/fischgpt-backend',
     endpoints: {
-      // Main functionality
       chat: 'POST /api/chat - Generate responses about Kristian Fischer',
       
-      // System endpoints
       health: 'GET /api/health - Service health check with detailed status',
       info: 'GET /api/info - Comprehensive service information',
       
-      // Wake-up service
       wake: 'POST /api/wake - Fire-and-forget GPU wake-up',
-      wakeStatus: 'GET /api/wake/status - Check GPU warm-up status',
-      wakeForce: 'POST /api/wake/force - Force wake-up with completion wait',
-      wakeInfo: 'GET /api/wake/info - Wake-up system information'
     },
     services: {
       gptService: {
@@ -109,15 +84,6 @@ router.get('/info', (req, res) => {
   });
 });
 
-/**
- * GET /api/status
- * Quick status check (lighter than full health check)
- * 
- * Returns:
- * - Basic service status
- * - Uptime
- * - Timestamp
- */
 router.get('/status', (req, res) => {
   res.json({
     success: true,
@@ -129,10 +95,6 @@ router.get('/status', (req, res) => {
   });
 });
 
-/**
- * GET /api/version
- * Get version information
- */
 router.get('/version', (req, res) => {
   res.json({
     success: true,

@@ -42,27 +42,6 @@ function validateChatRequest(body) {
   };
 }
 
-/**
- * POST /api/chat
- * Generates a response to a user query about Kristian Fischer
- * 
- * Request body:
- * {
- *   "query": "What experience does Kristian have?",
- *   "temperature": 0.8,     // optional, 0.0-1.0
- *   "maxTokens": 150,       // optional, 1-300
- *   "topP": 0.9            // optional, 0.0-1.0
- * }
- * 
- * Response:
- * {
- *   "success": true,
- *   "data": {
- *     "response": "Generated response about Kristian...",
- *     "metadata": { ... }
- *   }
- * }
- */
 router.post('/chat', async (req, res) => {
   try {
     // Validate request
@@ -77,17 +56,14 @@ router.post('/chat', async (req, res) => {
     
     const { query, temperature, maxTokens, topP } = req.body;
     
-    // Log the request (helpful for monitoring)
-    console.log(`💬 FischGPT chat request: "${query.substring(0, 100)}${query.length > 100 ? '...' : ''}"`);
+    console.log(`FischGPT chat request: "${query.substring(0, 100)}${query.length > 100 ? '...' : ''}"`);
     
-    // Generate response using GPT service
     const result = await generateResponse(query, {
       temperature,
       maxTokens,
       topP
     });
     
-    // Return successful response
     res.json({
       success: true,
       data: {
@@ -97,9 +73,8 @@ router.post('/chat', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('💥 FischGPT chat endpoint error:', error.message);
+    console.error('FischGPT chat endpoint error:', error.message);
     
-    // Return appropriate error response
     res.status(500).json({
       success: false,
       error: 'Failed to generate response',
