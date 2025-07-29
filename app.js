@@ -1,8 +1,5 @@
-import createError from 'http-errors';
 import express from 'express';
 import path from 'path';
-import cookieParser from 'cookie-parser';
-import logger from 'morgan';
 import cors from 'cors';
 
 import indexRouter from './routes/index.js';
@@ -13,6 +10,12 @@ import documentsRouter from './routes/documents.js';
 
 const app = express();
 
+// Simple request logging (replaces morgan)
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+  next();
+});
+
 // CORS configuration for frontend communication
 app.use(cors({
   origin: process.env.FRONTEND_URL || true, // Allow all origins in development
@@ -22,10 +25,8 @@ app.use(cors({
 }));
 
 // Middleware setup
-app.use(logger('dev'));
 app.use(express.json({ limit: '10mb' })); // Increased limit for potential larger prompts
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(process.cwd(), 'public')));
 
 // API routes (primary functionality)
@@ -39,27 +40,28 @@ app.use('/', indexRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+  const error = new Error('Not Found');
+  error.status = 404;
+  next(error);
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
   // For API routes, return JSON error responses
   if (req.path.startsWith('/api')) {
     return res.status(err.status || 500).json({
       success: false,
       error: err.message,
-      ...(req.app.get('env') === 'development' && { stack: err.stack })
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
     });
   }
 
-  // render the error page for non-API routes
+  // Simple error response for non-API routes
   res.status(err.status || 500);
-  res.render('error');
+  res.json({
+    error: err.message,
+    status: err.status || 500
+  });
 });
 
 export default app;
