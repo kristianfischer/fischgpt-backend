@@ -19,12 +19,9 @@ async function generateResponse(query, options = {}) {
       topP: options.topP !== undefined ? options.topP : DEFAULT_PARAMS.topP
     };
     
-    // 🔍 STEP 1: Perform RAG to get relevant context
     const ragContext = await performRAG(query, 5);
     
-    // 📝 STEP 2: Create the full prompt with RAG context
     const fullPrompt = createFullPrompt(query, ragContext);
-    
     
     const requestBody = {
       data: [
@@ -42,7 +39,6 @@ async function generateResponse(query, options = {}) {
       timeout: 90000,
     });
 
-    // Handle the nested data structure from the AI API
     const apiData = response.data.data && response.data.data[0] ? response.data.data[0] : response.data;
 
     if (apiData.error) {
@@ -60,6 +56,8 @@ async function generateResponse(query, options = {}) {
         promptLength: fullPrompt.length
       }
     };
+
+    console.log("GPT Service: response", result.response);
     
     return result;
 

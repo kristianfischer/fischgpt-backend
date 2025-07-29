@@ -6,7 +6,6 @@ import indexRouter from './routes/index.js';
 import gptRouter from './routes/gpt.js';
 import wakeUpRouter from './routes/wakeUp.js';
 import systemRouter from './routes/system.js';
-import documentsRouter from './routes/documents.js';
 
 const app = express();
 
@@ -33,7 +32,6 @@ app.use(express.static(path.join(process.cwd(), 'public')));
 app.use('/api', gptRouter);
 app.use('/api/wake', wakeUpRouter);
 app.use('/api', systemRouter);
-app.use('/api/documents', documentsRouter);
 
 // Legacy routes (keeping for compatibility)
 app.use('/', indexRouter);

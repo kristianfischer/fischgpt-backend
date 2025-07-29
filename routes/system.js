@@ -1,34 +1,14 @@
 import express from 'express';
 import { checkServiceHealth } from '../services/gptService.js';
 import { getEstimatedTokenCount } from '../config/systemPrompt.js';
-import getCollection from '../config/chroma.js';
 
 const router = express.Router();
-
-async function checkChromaDBHealth() {
-  try {
-    const collection = await getCollection;
-    const count = await collection.count();
-    return {
-      status: 'healthy',
-      documentCount: count,
-      collectionName: collection.name
-    };
-  } catch (error) {
-    return {
-      status: 'unhealthy',
-      error: error.message,
-      errorType: error.name
-    };
-  }
-}
 
 router.get('/health', async (req, res) => {
   try {
     
     const gptServiceHealthy = await checkServiceHealth();
     const systemPromptTokens = getEstimatedTokenCount();
-    const chromaDBHealth = await checkChromaDBHealth();
     
     res.json({
       success: true,
