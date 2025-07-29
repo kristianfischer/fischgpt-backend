@@ -19,10 +19,8 @@
     "docker:logs": "docker-compose logs -f"
   },
   "dependencies": {
-    "@chroma-core/default-embed": "^0.1.8",
     "axios": "^1.6.0",
     "chromadb": "^1.10.5",
-    "chromadb-default-embed": "^2.14.0",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
