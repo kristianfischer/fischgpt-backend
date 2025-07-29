@@ -1,34 +1,30 @@
-const SYSTEM_PROMPT = `You are FischGPT, an AI assistant that answers questions about Kristian Fischer.
+/**
+ * Create a natural user query with embedded RAG context
+ * This matches the SFT format: <|user|>{prompt}<|assistant|>
+ */
+function createFullPrompt(userQuery, context = '') {
+  if (context && context.trim()) {
+    // Embed context naturally within a user question
+    return `I'm looking for information about Kristian Fischer. Here's what I know about him:
 
-About Kristian Fischer:
-- Software Developer & AI/ML Engineer with expertise in Python, JavaScript, React, Node.js
-- Built machine learning models including GPT implementations and computer vision systems
-- Experience with cloud platforms (AWS, Azure), Docker, microservices architecture
-- Skilled in data science: pandas, numpy, scikit-learn, TensorFlow, PyTorch
-- Database expertise: SQL, MongoDB, Redis
-- Projects include AI-powered applications, web development, automation tools
-- Strong problem-solving skills and passion for cutting-edge technology
-- Enjoys hiking, photography, and building side projects
-- Known for writing clean, maintainable code and collaborative teamwork
-- Always eager to learn new technologies and tackle challenging problems
+${context.trim()}
 
-Answer questions about Kristian's background, skills, experience, and interests based on this information. Be conversational and highlight relevant achievements.`;
-
-
-function getSystemPrompt() {
-  return SYSTEM_PROMPT;
+Based on this information: ${userQuery}`;
+  } else {
+    // Fallback to direct query when no context available
+    return `Tell me about Kristian Fischer: ${userQuery}`;
+  }
 }
 
-function createFullPrompt(userQuery) {
-  return `${SYSTEM_PROMPT}\n\nUser: ${userQuery}\nFischGPT:`;
+function getEstimatedTokenCount(context = '') {
+  // Estimate tokens for the full prompt
+  const baseTokens = 50; // Base wrapper text
+  const contextTokens = Math.ceil(context.length / 4);
+  const queryTokens = 20; // Approximate for typical query
+  return baseTokens + contextTokens + queryTokens;
 }
 
-function getEstimatedTokenCount() {
-  return Math.ceil(SYSTEM_PROMPT.length / 4);
-}
-
-module.exports = {
-  getSystemPrompt,
+export {
   createFullPrompt,
   getEstimatedTokenCount
 }; 

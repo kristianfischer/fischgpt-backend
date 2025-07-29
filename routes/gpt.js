@@ -1,12 +1,9 @@
-const express = require('express');
-const router = express.Router();
-const { generateResponse } = require('../services/gptService');
+import express from 'express';
+import { generateResponse } from '../services/gptService.js';
 
-/**
- * Validates chat request parameters
- * @param {Object} body - Request body
- * @returns {Object} Validation result with isValid flag and errors array
- */
+const router = express.Router();
+
+
 function validateChatRequest(body) {
   const errors = [];
   
@@ -83,4 +80,4 @@ router.post('/chat', async (req, res) => {
   }
 });
 
-module.exports = router; 
+export default router; 

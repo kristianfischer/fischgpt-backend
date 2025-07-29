@@ -1,16 +1,17 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var cors = require('cors');
+import createError from 'http-errors';
+import express from 'express';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import logger from 'morgan';
+import cors from 'cors';
 
-var indexRouter = require('./routes/index');
-var gptRouter = require('./routes/gpt');
-var wakeUpRouter = require('./routes/wakeUp');
-var systemRouter = require('./routes/system');
+import indexRouter from './routes/index.js';
+import gptRouter from './routes/gpt.js';
+import wakeUpRouter from './routes/wakeUp.js';
+import systemRouter from './routes/system.js';
+import documentsRouter from './routes/documents.js';
 
-var app = express();
+const app = express();
 
 // CORS configuration for frontend communication
 app.use(cors({
@@ -25,12 +26,13 @@ app.use(logger('dev'));
 app.use(express.json({ limit: '10mb' })); // Increased limit for potential larger prompts
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(process.cwd(), 'public')));
 
 // API routes (primary functionality)
 app.use('/api', gptRouter);
 app.use('/api/wake', wakeUpRouter);
 app.use('/api', systemRouter);
+app.use('/api/documents', documentsRouter);
 
 // Legacy routes (keeping for compatibility)
 app.use('/', indexRouter);
@@ -60,4 +62,4 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+export default app;

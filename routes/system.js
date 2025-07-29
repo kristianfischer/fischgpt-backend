@@ -1,12 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const { checkServiceHealth } = require('../services/gptService');
-const { getEstimatedTokenCount } = require('../config/systemPrompt');
+import express from 'express';
+import { checkServiceHealth } from '../services/gptService.js';
+import { getEstimatedTokenCount } from '../config/systemPrompt.js';
 
+const router = express.Router();
 
 router.get('/health', async (req, res) => {
   try {
-    console.log('🔍 Health check requested');
     
     const gptServiceHealthy = await checkServiceHealth();
     const systemPromptTokens = getEstimatedTokenCount();
@@ -105,4 +104,4 @@ router.get('/version', (req, res) => {
   });
 });
 
-module.exports = router; 
+export default router; 

@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import { wakeUpService } from '../services/wakeUpService.js';
+
 const router = express.Router();
-const { wakeUpService, isServiceWarmedUp } = require('../services/wakeUpService');
 
 router.post('/', async (req, res) => {
   try {
@@ -34,5 +35,4 @@ router.post('/', async (req, res) => {
   }
 });
 
-
-module.exports = router; 
+export default router; 

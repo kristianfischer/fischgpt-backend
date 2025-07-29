@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 const WAKEUP_API_URL = 'https://kristianfischerai12345-fischgpt-api.hf.space/api/wake-up';
 
@@ -29,6 +29,6 @@ async function wakeUpService() {
   }
 }
 
-module.exports = {
+export {
   wakeUpService,
 }; 

@@ -1,5 +1,6 @@
-const axios = require('axios');
-const { createFullPrompt } = require('../config/systemPrompt');
+import axios from 'axios';
+import { createFullPrompt } from '../config/systemPrompt.js';
+import { performRAG } from './ragService.js';
 
 const AI_API_URL = 'https://kristianfischerai12345-fischgpt-api.hf.space/api/predict';
 
@@ -18,8 +19,12 @@ async function generateResponse(query, options = {}) {
       topP: options.topP !== undefined ? options.topP : DEFAULT_PARAMS.topP
     };
     
-    // Create the full prompt with system context
-    const fullPrompt = createFullPrompt(query);
+    // 🔍 STEP 1: Perform RAG to get relevant context
+    const ragContext = await performRAG(query, 5);
+    
+    // 📝 STEP 2: Create the full prompt with RAG context
+    const fullPrompt = createFullPrompt(query, ragContext);
+    
     
     const requestBody = {
       data: [
@@ -48,10 +53,14 @@ async function generateResponse(query, options = {}) {
     const result = {
       success: true,
       response: apiData.response,
-      metadata: apiData.metadata
+      metadata: {
+        ...apiData.metadata,
+        ragUsed: ragContext.length > 0,
+        contextLength: ragContext.length,
+        promptLength: fullPrompt.length
+      }
     };
-
-    console.log('Processed result:', JSON.stringify(result, null, 2));
+    
     return result;
 
   } catch (error) {
@@ -87,7 +96,7 @@ async function checkServiceHealth() {
   }
 }
 
-module.exports = {
+export {
   generateResponse,
   checkServiceHealth,
   DEFAULT_PARAMS

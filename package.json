@@ -5,19 +5,33 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "type": "module",
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "nodemon ./bin/www"
+    "dev": "nodemon ./bin/www",
+    "setup-chromadb": "node scripts/setup-chromadb.js",
+    "chromadb-start": "node scripts/setup-chromadb.js --start",
+    "chromadb-docker": "node scripts/setup-chromadb.js --docker",
+    "docker:build": "docker build -t fischgpt-backend .",
+    "docker:run": "docker run -p 3000:3000 fischgpt-backend",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
   },
   "dependencies": {
+    "@chroma-core/default-embed": "^0.1.8",
     "axios": "^1.6.0",
+    "chromadb": "^1.10.5",
+    "chromadb-default-embed": "^2.14.0",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
+    "dotenv": "^17.2.1",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
-    "morgan": "~1.9.1"
+    "morgan": "~1.9.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
