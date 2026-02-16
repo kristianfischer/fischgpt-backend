@@ -1,83 +1,69 @@
-import axios from 'axios';
+import { Client } from '@gradio/client';
 import { createFullPrompt } from '../config/systemPrompt.js';
 import { performRAG } from './ragService.js';
 
-const AI_API_URL = 'https://kristianfischerai12345-fischgpt-api.hf.space/api/predict';
+const GRADIO_SPACE = 'kristianfischerai12345/fischgpt-api';
 
 const DEFAULT_PARAMS = {
   temperature: 0.8,
-  maxTokens: 400,
+  maxTokens: 300,
   topP: 0.9
 };
 
 async function generateResponse(query, options = {}) {
   try {
-
     const params = {
       temperature: options.temperature !== undefined ? options.temperature : DEFAULT_PARAMS.temperature,
       maxTokens: options.maxTokens !== undefined ? options.maxTokens : DEFAULT_PARAMS.maxTokens,
       topP: options.topP !== undefined ? options.topP : DEFAULT_PARAMS.topP
     };
-    
-    const ragContext = await performRAG(query, 5);
-    
-    const fullPrompt = createFullPrompt(query, ragContext);
-    
-    const requestBody = {
-      data: [
-        fullPrompt,
-        params.temperature,
-        params.maxTokens,
-        params.topP
-      ]
-    };
 
-    const response = await axios.post(AI_API_URL, requestBody, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      timeout: 90000,
+    const ragContext = await performRAG(query, 5);
+    const fullPrompt = createFullPrompt(query, ragContext);
+
+    const client = await Client.connect(GRADIO_SPACE);
+    const result = await client.predict('/predict', {
+      user_message: fullPrompt,
+      temperature: params.temperature,
+      max_length: params.maxTokens,
+      top_p: params.topP
     });
 
-    const apiData = response.data.data && response.data.data[0] ? response.data.data[0] : response.data;
-
-    if (apiData.error) {
+    // Gradio predict returns { data } - data may be string or object depending on Space output
+    const apiData = result?.data;
+    if (apiData?.error) {
       console.error('❌ AI API returned error:', apiData.error);
       throw new Error(`AI API Error: ${apiData.error}`);
     }
 
-    const result = {
+    // Gradio often returns data as array of outputs (e.g. [assistantMessage])
+    const raw = Array.isArray(apiData) ? apiData[0] : apiData;
+    const responseText = typeof raw === 'string'
+      ? raw
+      : (raw?.response ?? raw?.data?.[0] ?? String(raw ?? ''));
+
+    const out = {
       success: true,
-      response: apiData.response,
+      response: responseText,
       metadata: {
-        ...apiData.metadata,
         ragUsed: ragContext.length > 0,
         contextLength: ragContext.length,
         promptLength: fullPrompt.length
       }
     };
 
-    console.log("GPT Service: response", result.response);
-    
-    return result;
-
+    console.log('GPT Service: response', out.response);
+    return out;
   } catch (error) {
     console.error('GPT Service Error:', error.message);
-    
-    if (error.code === 'ECONNABORTED') {
+
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
       throw new Error('Request timeout - the AI service is taking too long to respond');
     }
-    
-    if (error.response) {
-      console.error('Error response data:', error.response.data);
-      throw new Error(`AI API returned ${error.response.status}: ${error.response.statusText}`);
+    if (error.message?.startsWith('AI API Error:')) {
+      throw error;
     }
-    
-    if (error.request) {
-      throw new Error('Unable to reach the AI service - please try again later');
-    }
-    
-    throw error;
+    throw new Error('Unable to reach the AI service - please try again later');
   }
 }
 
