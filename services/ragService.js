@@ -7,6 +7,25 @@ dotenv.config();
 const CHROMA_API_BASE = `https://api.trychroma.com/api/v2/tenants/${process.env.CHROMA_TENANT_ID}/databases/${process.env.CHROMA_DATABASE}/collections/${process.env.CHROMA_COLLECTION}`;
 const CHROMA_API_TOKEN = process.env.CHROMA_API_TOKEN;
 
+export async function getChromaHealth() {
+  if (!CHROMA_API_TOKEN || !process.env.CHROMA_TENANT_ID || !process.env.CHROMA_DATABASE || !process.env.CHROMA_COLLECTION) {
+    return { status: 'unconfigured', documentCount: 0 };
+  }
+  try {
+    const response = await axios.get(`${CHROMA_API_BASE}/count`, {
+      headers: {
+        'X-Chroma-Token': CHROMA_API_TOKEN,
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    });
+    const documentCount = typeof response.data === 'number' ? response.data : Number(response.data) || 0;
+    return { status: 'healthy', documentCount };
+  } catch (error) {
+    const message = error.response?.data?.message || error.message;
+    return { status: 'unhealthy', documentCount: 0, error: message };
+  }
+}
 
 export async function searchRelevantDocuments(query, nResults = 5) {
   try {
@@ -30,8 +49,16 @@ export async function searchRelevantDocuments(query, nResults = 5) {
     });
 
     const results = response.data;
-
-    console.log("Documents: retrieved", results.documents[0].length, "documents");
+    const rawCount = results.documents?.[0]?.length ?? 0; // logging for RAG visibility
+    const neighborSummary = rawCount
+      ? results.distances[0].map((d, i) => ({
+          rank: i + 1,
+          distance: Number(d.toFixed(4)),
+          section: results.metadatas[0][i]?.section ?? '—',
+          subsection: results.metadatas[0][i]?.subsection ?? '—'
+        }))
+      : [];
+    console.log(`RAG: Returned ${rawCount}/${nResults} neighbors:`, neighborSummary);
 
     const relevantDocs = [];
     
@@ -50,7 +77,13 @@ export async function searchRelevantDocuments(query, nResults = 5) {
     }
     
     relevantDocs.sort((a, b) => a.distance - b.distance);
-    
+
+    console.log(`RAG: Threshold filter distance < 2.0 → kept ${relevantDocs.length}/${rawCount} chunks for context injection.`);
+    if (relevantDocs[0]) {
+      const preview = relevantDocs[0].content.replace(/\s+/g, ' ').slice(0, 140);
+      console.log(`RAG: Closest chunk preview: "${preview}${relevantDocs[0].content.length > 140 ? '…' : ''}"`);
+    }
+
     return relevantDocs;
 
   } catch (error) {
@@ -59,7 +92,7 @@ export async function searchRelevantDocuments(query, nResults = 5) {
   }
 }
 
-export function formatDocumentsAsContext(documents) {
+export function formatDocumentsAsContext(documents) { // reformat for prompt injection
   if (!documents || documents.length === 0) {
     return '';
   }

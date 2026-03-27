@@ -32,7 +32,7 @@ async function generateResponse(query, options = {}) {
     // Gradio predict returns { data } - data may be string or object depending on Space output
     const apiData = result?.data;
     if (apiData?.error) {
-      console.error('❌ AI API returned error:', apiData.error);
+      console.error('AI API returned error:', apiData.error);
       throw new Error(`AI API Error: ${apiData.error}`);
     }
 

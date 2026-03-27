@@ -1,6 +1,7 @@
 import express from 'express';
 import { checkServiceHealth } from '../services/gptService.js';
 import { getEstimatedTokenCount } from '../config/systemPrompt.js';
+import { getChromaHealth } from '../services/ragService.js';
 
 const router = express.Router();
 
@@ -9,7 +10,8 @@ router.get('/health', async (req, res) => {
     
     const gptServiceHealthy = await checkServiceHealth();
     const systemPromptTokens = getEstimatedTokenCount();
-    
+    const chromaDBHealth = await getChromaHealth();
+
     res.json({
       success: true,
       status: 'healthy',
@@ -26,7 +28,7 @@ router.get('/health', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('💥 Health check error:', error.message);
+    console.error('Health check error:', error.message);
     
     res.status(500).json({
       success: false,

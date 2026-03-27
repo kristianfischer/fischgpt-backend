@@ -3,7 +3,7 @@ import { wakeUpService } from '../services/wakeUpService.js';
 
 const router = express.Router();
 
-router.post('/', async (req, res) => {
+router.post('/wake', async (req, res) => {
   try {
 
     const wakeUpPromise = wakeUpService();

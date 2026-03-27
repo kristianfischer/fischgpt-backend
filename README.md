@@ -31,11 +31,15 @@ Chat with FischGPT about Kristian Fischer.
 }
 ```
 
-### `POST /api/documents`
-Upload resume documents to ChromaDB.
 
 ### `GET /api/health`
 Service health check.
+
+### `GET /api/info`
+
+### `GET /api/status`
+
+### `GET /api/version`
 
 ## Architecture
 
@@ -44,14 +48,14 @@ Service health check.
 - **AI Integration**: Custom FischGPT model on Hugging Face
 - **Document Management**: Structured resume data with metadata
 
-## 📁 Structure
+## Structure
 
 ```
 ├── routes/          # API endpoints
 ├── services/        # RAG and AI services  
 ├── config/          # ChromaDB and prompt config
-├── controllers/     # Document management
-└── scripts/         # Data upload utilities
+
+
 ```
 
 Built with Express.js, ChromaDB, and semantic search for precise, context-aware responses about Kristian Fischer's professional background. 

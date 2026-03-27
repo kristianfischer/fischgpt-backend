@@ -9,13 +9,12 @@ import systemRouter from './routes/system.js';
 
 const app = express();
 
-// Simple request logging (replaces morgan)
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
   next();
 });
 
-// CORS configuration for frontend communication
+// CORS config
 app.use(cors({
   origin: process.env.FRONTEND_URL || true, // Allow all origins in development
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -23,17 +22,16 @@ app.use(cors({
   credentials: true
 }));
 
-// Middleware setup
 app.use(express.json({ limit: '10mb' })); // Increased limit for potential larger prompts
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(process.cwd(), 'public')));
 
-// API routes (primary functionality)
+// API routes
 app.use('/api', gptRouter);
-app.use('/api/wake', wakeUpRouter);
+app.use('/api', wakeUpRouter);
 app.use('/api', systemRouter);
 
-// Legacy routes (keeping for compatibility)
+// Legacy routes
 app.use('/', indexRouter);
 
 // catch 404 and forward to error handler
